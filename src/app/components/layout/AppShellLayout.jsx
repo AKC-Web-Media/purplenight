@@ -21,7 +21,8 @@ import SharedContent from "@/app/shared/blogs/public/[id]/page";
 import SubscriptionCard from "./SubscriptionCard";
 import SubscriptionModal from "../SubscriptionModal";
 import FeedbackModalProvider from "../FeedbackModalProvider";
-
+import CategorySelect from "../CategorySelect";
+// import ScrollSlider from "./ScrollSlider"
 function AppShellLayout({ children }) {
   const { user } = useUser();
   // status can be idle, pending, success, error
@@ -85,7 +86,9 @@ function AppShellLayout({ children }) {
                 />
                 <NavigationRoutes toggle={toggleNavbar} colorScheme={colorScheme} />
               </Stack>
-              <Stack gap={0}>
+              {/* <ScrollSlider /> */}
+              <CategorySelect />
+             <Stack gap={0}>
                 <SubscriptionCard
                   open={open}
                   colorScheme={colorScheme}
