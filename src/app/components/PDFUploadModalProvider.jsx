@@ -13,6 +13,8 @@ import {
   Loader,
   Slider,
   Badge,
+  Overlay,
+  LoadingOverlay,
 } from "@mantine/core";
 import { Book, FileArrowUp, Sparkle, Trash } from "@phosphor-icons/react";
 import { dark_theme } from "@/app/config/theme";
@@ -58,7 +60,7 @@ function PDFUploadModalProvider() {
   const [book, setBook] = useState(null);
   const [authorName, setAuthorName] = useState(null);
   const [bookTitle, setBookTitle] = useState(null);
-  const [plan, setPlan] = useState(null);
+  const [plan, setPlan] = useState(false);
   const colorScheme = useComputedColorScheme();
   // const [count, handlers] = useCounter(plan?.possiblePercentageJump, { min: plan?.possiblePercentageJump, max: 100 });
 
@@ -109,7 +111,8 @@ function PDFUploadModalProvider() {
     mutationFn: getTokenPlan,
     onSuccess: tokenPlanOnSuccess,
     onError: (err) => {
-      toast.error("Something gone wrong our side");
+      toast.error(err);
+      setBook(null)
     },
   });
 
@@ -124,7 +127,8 @@ function PDFUploadModalProvider() {
 
   return (
     <ModalForm opened={opened} close={close} title="upload">
-      <Stack gap={"0"} miw={230}>
+      <LoadingOverlay visible={status === 'pending' ? true : false} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
+      <Stack gap={0} miw={230}>
         <Input.Wrapper
           c={colorScheme === "dark" ? dark_theme.secondary_text_color : "dark"}
           l
@@ -162,11 +166,10 @@ function PDFUploadModalProvider() {
           bg={
             colorScheme === "dark" ? dark_theme.nav_link_dark_color : "#f1f3f5"
           }
-          mt={"sm"}
           padding="xs"
           radius="md"
         >
-          <Group wrap="nowrap" justify="space-between">
+          <Group gap={0} wrap="nowrap" justify="space-between">
             <Group wrap="nowrap" >
               <BackgroundImage
                 onClick={chooseRandomImage}
@@ -197,11 +200,12 @@ function PDFUploadModalProvider() {
                 </Text>
               </Stack>
             </Group>
-            {}
             {tokenPlanStatus === "success" && (
               <ActionIcon
-                disabled={status === "pending"}
-                onClick={() => setBook(null)}
+                onClick={() => {
+                  setBook(null);
+                  setPlan(false)
+                }}
                 mr={"xs"}
                 size={"lg"}
                 radius={"xl"}
@@ -222,8 +226,9 @@ function PDFUploadModalProvider() {
             )}
           </Group>
           {tokenPlanStatus === "success" && (
-            <Stack mt={"xs"}>
+            <Stack >
               <Slider
+                mt={'xs'}
                 onChange={setSliderVal}
                 restrictToMarks
                 value={sliderVal}
@@ -269,6 +274,7 @@ function PDFUploadModalProvider() {
         </Card>
       )}
       <Dropzone
+        mb={0}
         styles={{
           root: {
             border: "none",
@@ -276,6 +282,7 @@ function PDFUploadModalProvider() {
             background: "none",
           },
         }}
+        display={book && 'none'}
         onDrop={async (file) => {
           setBook(file);
           chooseRandomImage();
@@ -360,10 +367,9 @@ function PDFUploadModalProvider() {
         )}
       </Dropzone>
 
-      {book && (
+      {book && plan && (
         <Button
           variant="filled"
-          mt={"xs"}
           styles={{ section: { marginInlineEnd: "5px" } }}
           leftSection={<Sparkle color={"black"} size={18} weight="fill" />}
           size="sm"
@@ -376,8 +382,6 @@ function PDFUploadModalProvider() {
               : theme.colors.gray[2]
           }
           radius="md"
-          loaderProps={{ type: "dots", color: "dark" }}
-          loading={status === "pending"}
           onClick={async () => {
             await postThePDF({
               getToken,
