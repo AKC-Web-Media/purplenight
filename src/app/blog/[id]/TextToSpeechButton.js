@@ -1,6 +1,6 @@
 "use client";
+import { SpeakerHigh } from "@phosphor-icons/react";
 import React, { useState, useEffect } from "react";
-import { RxSpeakerLoud } from "react-icons/rx";
 
 const TextToSpeechButton = ({ blogContent }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -48,7 +48,7 @@ const TextToSpeechButton = ({ blogContent }) => {
         transition: "color 0.3s ease-in-out",
       }}
     >
-      <RxSpeakerLoud />
+      <SpeakerHigh/>
     </button>
   );
 };
