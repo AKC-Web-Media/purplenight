@@ -1,6 +1,6 @@
 "use client";
 import {
-  Center, Loader, Text, Image, Badge, Stack, Code, Group, ScrollArea, 
+  Center,  Text, Image, Badge, Stack, Code, Group, ScrollArea, 
   useComputedColorScheme, useMantineTheme, Skeleton
 } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
@@ -16,8 +16,51 @@ import { afacad_flux, spectral } from "@/app/font";
 import { dark_theme } from "@/app/config/theme";
 import { useAuth } from "@clerk/nextjs";
 import TextToSpeechButton from "./TextToSpeechButton";
-
-
+function Demo() {
+   return (
+     <>
+       <Skeleton height={300} width={785} mb="xl" radius="md" />
+       <Skeleton height={20} width={65} radius="xl" />
+       <Skeleton height={17} mt={6} width={65} radius="md" />
+       <Skeleton height={50} mt={40} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={18} width="40%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="70%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="70%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="30%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+       <Skeleton height={12} mt={12} width="100%" radius="md" />
+     </>
+   );
+ }
+ 
+ 
+ 
 const TextMarkdown = ({ children }) => (
   <Text fw={400} py="xs" ta="left" size="lg" className={spectral.className}>
     {children}
@@ -67,9 +110,16 @@ function ReadBlog() {
   });
 
   if (isLoading) {
-     return <Skeleton height={300} />;
+     return <Demo/>
   }
- 
+
+   if (!data) {
+     return (
+       <Center maw={800} w={"100%"} ref={ref} h="100%">
+         <Text>No blog data found.</Text>
+       </Center>
+     );
+   } 
   if (isError) {
     return (
       <Center maw={800} w={"100%"} ref={ref} h="100%">
@@ -93,19 +143,7 @@ function ReadBlog() {
       />
 
       <Stack gap={0}>
-        <Badge 
-          color={colorScheme === "dark" ? dark_theme.main_text_color : theme.colors.gray[6]} 
-          mt="md" 
-          variant="light" 
-          size="lg" 
-          className={afacad_flux.className} 
-          style={{ boxShadow: cardShadows.xs }}
-     <Stack ref={ref} w={"100%"} miw={300} align="start" maw={800} px="md" mx="auto" gap="lg" mb={isSmallScreen ? 100 : 0}
-    >
       {/* Blog Image */}
-      <Image w="100%" miw={300} maw={800} src={blogData?.blog_image || `/images_4_blogs/1.jpg`} style={{ boxShadow: cardShadows.xs }} radius="md" mih={300} mah={300} />
-
-      <Stack gap={0}>
         {/* Book Badge */}
         <Badge color={colorScheme === "dark" ? dark_theme.main_text_color : theme.colors.gray[6]} mt="md" variant="light" size="lg" className={afacad_flux.className} style={{ boxShadow: cardShadows.xs }}
          >
