@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 const ScrollSlider = ({ setGenerateBookId, openGenerateBookModal, item }) => {
-  const [uploadProgress, setUploadProgress] = useState(10); // Example: 10% uploaded
+  const [uploadProgress, setUploadProgress] = useState(10);
 
   const handleUpload = () => {
     let progress = uploadProgress;

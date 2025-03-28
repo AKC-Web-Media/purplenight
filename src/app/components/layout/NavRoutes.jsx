@@ -5,6 +5,7 @@ import { cardShadows } from "@/app/utils/shadows";
 import { usePathname, useRouter } from "next/navigation";
 import { memo, useEffect, useState } from "react";
 import { dark_theme } from "@/app/config/theme";
+import CategorySelect from "../CategorySelect";
 
 const NavRoutes = ({ toggle, colorScheme }) => {
   const router = useRouter();
