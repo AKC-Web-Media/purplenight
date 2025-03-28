@@ -17,6 +17,7 @@ import { dark_theme } from "@/app/config/theme";
 import { useAuth } from "@clerk/nextjs";
 import TextToSpeechButton from "./TextToSpeechButton";
 
+
 const TextMarkdown = ({ children }) => (
   <Text fw={400} py="xs" ta="left" size="lg" className={spectral.className}>
     {children}
@@ -55,7 +56,10 @@ function ReadBlog() {
   const { id: blog_id } = useParams();
   const colorScheme = useComputedColorScheme();
   const isSmallScreen = useMediaQuery("(max-width:480px)");
-  const { getToken } = useAuth();
+
+
+  const isBigScreen = useMediaQuery("(min-width:1200px)")
+  const { getToken } = useAuth()
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["blog", blog_id],
@@ -63,21 +67,20 @@ function ReadBlog() {
   });
 
   if (isLoading) {
-    return <Skeleton height={300} />;
+     return <Skeleton height={300} />;
   }
-
-  if (isError || !data) {
+ 
+  if (isError) {
     return (
       <Center maw={800} w={"100%"} ref={ref} h="100%">
         <Text>Error occurred while fetching the blog.</Text>
       </Center>
     );
   }
-
+ 
   const { blogData, allBlogsWithBookId } = data;
-
   return (
-    <Stack ref={ref} w={"100%"} miw={300} align="start" maw={800} px="md" mx="auto" gap="lg" mb={isSmallScreen ? 100 : 0}>
+     <Stack ref={ref} w={"100%"} miw={300} align="start" maw={800} px="md" mx="auto" gap="lg" mb={isSmallScreen ? 100 : 0}>
       <Image 
         w="100%" 
         miw={300} 
@@ -97,16 +100,23 @@ function ReadBlog() {
           size="lg" 
           className={afacad_flux.className} 
           style={{ boxShadow: cardShadows.xs }}
-        >
+     <Stack ref={ref} w={"100%"} miw={300} align="start" maw={800} px="md" mx="auto" gap="lg" mb={isSmallScreen ? 100 : 0}
+    >
+      {/* Blog Image */}
+      <Image w="100%" miw={300} maw={800} src={blogData?.blog_image || `/images_4_blogs/1.jpg`} style={{ boxShadow: cardShadows.xs }} radius="md" mih={300} mah={300} />
+
+      <Stack gap={0}>
+        {/* Book Badge */}
+        <Badge color={colorScheme === "dark" ? dark_theme.main_text_color : theme.colors.gray[6]} mt="md" variant="light" size="lg" className={afacad_flux.className} style={{ boxShadow: cardShadows.xs }}
+         >
           {blogData.books.book_name}
         </Badge>
 
-        <Text 
-          c={colorScheme === "dark" ? "#febeb5" : theme.colors.gray[6]} 
-          ta="left" 
-          size="md"
-          className={afacad_flux.className}
-        >
+ 
+        {/* Author Name */}
+        <Text
+          c={colorScheme === "dark" ? "#febeb5" : theme.colors.gray[6]} ta="left" size="md" className={afacad_flux.className}
+         >
           —{blogData.books?.author || "Unknown"}
         </Text>
 

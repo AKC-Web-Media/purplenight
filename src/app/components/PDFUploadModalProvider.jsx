@@ -2,7 +2,6 @@
 import {
   Group,
   Stack,
-  Modal,
   Button,
   Input,
   Card,
@@ -14,6 +13,8 @@ import {
   Loader,
   Slider,
   Badge,
+  Overlay,
+  LoadingOverlay,
 } from "@mantine/core";
 import { Book, FileArrowUp, Sparkle, Trash } from "@phosphor-icons/react";
 import { dark_theme } from "@/app/config/theme";
@@ -31,7 +32,7 @@ import { postPDF } from "../server-functions/postPDF";
 import { getSubscription } from "@/appwrite/get/getSubscription";
 import { getTokenPlan } from "../server-functions/getTokenPlan";
 import ModalForm from "./ModalForm";
-import CategorySelect from "./CategorySelect";
+import { getPDFMetadata } from "../helpers/helper";
 
 function PDFUploadModalProvider() {
   const { user } = useUser();
@@ -42,13 +43,10 @@ function PDFUploadModalProvider() {
   const [sliderState, setSliderState] = useState(null);
   const [sliderVal, setSliderVal] = useState(0);
 
-  // const queryClient = useQueryClient();
-  // const { } = queryClient.getQueryData(["blog"]);
 
   function chooseRandomImage() {
     setCurrentImage(
-      `/compress-cats/${
-        imageArray[Math.floor(Math.random() * imageArray.length)]
+      `/compress-cats/${imageArray[Math.floor(Math.random() * imageArray.length)]
       }`
     );
   }
@@ -63,7 +61,8 @@ function PDFUploadModalProvider() {
   const [book, setBook] = useState(null);
   const [authorName, setAuthorName] = useState(null);
   const [bookTitle, setBookTitle] = useState(null);
-  const [plan, setPlan] = useState(null);
+  const [plan, setPlan] = useState(false);
+  const [isGenerateButton, setIsGenerateButton] =  useState(false)
   const colorScheme = useComputedColorScheme();
   // const [count, handlers] = useCounter(plan?.possiblePercentageJump, { min: plan?.possiblePercentageJump, max: 100 });
 
@@ -77,6 +76,7 @@ function PDFUploadModalProvider() {
       setBook(null);
       setAuthorName(null);
       setBookTitle(null);
+      setIsGenerateButton(false)
     },
     onError: (err) => {
       close();
@@ -86,8 +86,8 @@ function PDFUploadModalProvider() {
       toast.error(err.message);
     },
   });
-
   function tokenPlanOnSuccess({ possiblePercentangeJump }) {
+    setIsGenerateButton(true)
     const closestTo100 = roundToClosestFactorOf100(possiblePercentangeJump);
 
     const marks = Array.from({
@@ -115,11 +115,12 @@ function PDFUploadModalProvider() {
     mutationFn: getTokenPlan,
     onSuccess: tokenPlanOnSuccess,
     onError: (err) => {
-      toast.error("Something gone wrong our side");
+      toast.error(err);
+      setBook(null)
     },
   });
 
-  const { data, isLoading, isSuccess } = useQuery({
+  const { data, _, isSuccess } = useQuery({
     queryKey: ["blog"],
     queryFn: () => getSubscription({ getToken }),
   });
@@ -130,7 +131,8 @@ function PDFUploadModalProvider() {
 
   return (
     <ModalForm opened={opened} close={close} title="upload">
-      <Stack gap={"0"} miw={230}>
+      <LoadingOverlay visible={status === 'pending' ? true : false} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
+      <Stack gap={0} miw={230}>
         <Input.Wrapper
           c={colorScheme === "dark" ? dark_theme.secondary_text_color : "dark"}
           l
@@ -161,20 +163,18 @@ function PDFUploadModalProvider() {
           />
         </Input.Wrapper>
       </Stack>
-      <CategorySelect />
-
+ 
       {book && (
         <Card
           withBorder
           bg={
             colorScheme === "dark" ? dark_theme.nav_link_dark_color : "#f1f3f5"
           }
-          mt={"sm"}
           padding="xs"
           radius="md"
         >
-          <Group wrap="nowrap" justify="space-between">
-            <Group wrap="nowrap" gap={"xs"}>
+          <Group gap={0} wrap="nowrap" justify="space-between">
+            <Group wrap="nowrap" >
               <BackgroundImage
                 onClick={chooseRandomImage}
                 src={currentImage}
@@ -204,11 +204,15 @@ function PDFUploadModalProvider() {
                 </Text>
               </Stack>
             </Group>
-            {}
             {tokenPlanStatus === "success" && (
               <ActionIcon
-                disabled={status === "pending"}
-                onClick={() => setBook(null)}
+                onClick={() => {
+                  setBook(null);
+                  setIsGenerateButton(false)
+                  setPlan(false)
+                  setAuthorName('')
+                  setBookTitle('')
+                }}
                 mr={"xs"}
                 size={"lg"}
                 radius={"xl"}
@@ -229,8 +233,9 @@ function PDFUploadModalProvider() {
             )}
           </Group>
           {tokenPlanStatus === "success" && (
-            <Stack gap={"xs"} mt={"xs"}>
+            <Stack >
               <Slider
+                mt={'xs'}
                 onChange={setSliderVal}
                 restrictToMarks
                 value={sliderVal}
@@ -251,7 +256,7 @@ function PDFUploadModalProvider() {
                 min={sliderState.min}
                 marks={sliderState.marks}
               />
-              <Group gap={"xs"}>
+              <Group mt={'xs'} gap={"xs"}>
                 <Badge
                   size="sm"
                   variant="light"
@@ -276,6 +281,7 @@ function PDFUploadModalProvider() {
         </Card>
       )}
       <Dropzone
+        mb={0}
         styles={{
           root: {
             border: "none",
@@ -283,22 +289,24 @@ function PDFUploadModalProvider() {
             background: "none",
           },
         }}
+        display={book && 'none'}
         onDrop={async (file) => {
           setBook(file);
           chooseRandomImage();
           await getTheTokenPlan({ getToken, file });
           if (tokenPlanStatus === "success") {
             setPlan(tokenPlanData);
+            setIsGenerateButton(true)
           }
+        await getPDFMetadata({file: file[0], setAuthorName, setBookTitle}); 
         }}
         onReject={() => {
           toast.error(
-            `Should not exceed ${
-              isSuccess &&
-              Math.floor(
-                calcPDFSize(data.subscription_type, data.isActiveSubscription) /
-                  1000000
-              )
+            `Should not exceed ${isSuccess &&
+            Math.floor(
+              calcPDFSize(data.subscription_type, data.isActiveSubscription) /
+              1000000
+            )
             }MB`
           );
         }}
@@ -309,17 +317,17 @@ function PDFUploadModalProvider() {
         accept={
           isSuccess && data.isActiveSubscription
             ? [
-                PDF_MIME_TYPE,
-                MIME_TYPES.docx,
-                MIME_TYPES.doc,
-                "text/plain",
-                "application/epub+zip",
-              ]
+              PDF_MIME_TYPE,
+              MIME_TYPES.docx,
+              MIME_TYPES.doc,
+              "text/plain",
+              "application/epub+zip",
+            ]
             : PDF_MIME_TYPE
         }
       >
         {!book && (
-          <Stack mt={"md"} justify="center" style={{ pointerEvents: "none" }}>
+          <Stack mt={"xs"} justify="center" style={{ pointerEvents: "none" }}>
             <Dropzone.Idle>
               <Button
                 style={{ boxShadow: cardShadows.md }}
@@ -368,10 +376,10 @@ function PDFUploadModalProvider() {
         )}
       </Dropzone>
 
-      {book && (
+      {
+        isGenerateButton && 
         <Button
           variant="filled"
-          mt={"md"}
           styles={{ section: { marginInlineEnd: "5px" } }}
           leftSection={<Sparkle color={"black"} size={18} weight="fill" />}
           size="sm"
@@ -384,8 +392,6 @@ function PDFUploadModalProvider() {
               : theme.colors.gray[2]
           }
           radius="md"
-          loaderProps={{ type: "dots", color: "dark" }}
-          loading={status === "pending"}
           onClick={async () => {
             await postThePDF({
               getToken,
@@ -400,7 +406,7 @@ function PDFUploadModalProvider() {
         >
           Generate
         </Button>
-      )}
+      }
     </ModalForm>
   );
 }
