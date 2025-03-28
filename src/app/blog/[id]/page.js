@@ -1,6 +1,7 @@
 "use client";
 import {
-  Center, Loader, Text, Image, Badge, Stack, Code, Group, ScrollArea, useComputedColorScheme, useMantineTheme,
+  Center, Loader, Text, Image, Badge, Stack, Code, Group, ScrollArea, 
+  useComputedColorScheme, useMantineTheme, Skeleton
 } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { getBlogAndSuggestedBlogs } from "../../../appwrite/getBlogById";
@@ -14,57 +15,13 @@ import TitleComponent from "@/app/components/TitleComponent";
 import { afacad_flux, spectral } from "@/app/font";
 import { dark_theme } from "@/app/config/theme";
 import { useAuth } from "@clerk/nextjs";
-import { Skeleton } from '@mantine/core';
+import TextToSpeechButton from "./TextToSpeechButton";
 
 const TextMarkdown = ({ children }) => (
   <Text fw={400} py="xs" ta="left" size="lg" className={spectral.className}>
     {children}
   </Text>
 );
-
-function Demo() {
-  return (
-    <>
-      <Skeleton height={300} width={785} mb="xl" radius="md" />
-      <Skeleton height={20} width={65} radius="xl" />
-      <Skeleton height={17} mt={6} width={65} radius="md" />
-      <Skeleton height={50} mt={40} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={18} width="40%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="70%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="70%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="30%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-      <Skeleton height={12} mt={12} width="100%" radius="md" />
-    </>
-  );
-}
-
 
 const CodeBlock = ({ children }) => <Code block>{children}</Code>;
 const EmphasizedText = ({ children }) => (
@@ -80,7 +37,7 @@ const MarkdownToCustom = ({ markdown }) => (
       overrides: {
         code: { component: CodeBlock },
         h1: { component: (props) => <TitleComponent {...props} order={1} /> },
-        h2: { component: (props) => <TitleComponent {...props} order={1} /> },
+        h2: { component: (props) => <TitleComponent {...props} order={2} /> },
         h3: { component: (props) => <TitleComponent {...props} order={3} /> },
         p: { component: TextMarkdown },
         em: { component: EmphasizedText },
@@ -98,7 +55,6 @@ function ReadBlog() {
   const { id: blog_id } = useParams();
   const colorScheme = useComputedColorScheme();
   const isSmallScreen = useMediaQuery("(max-width:480px)");
-  const isBigScreen = useMediaQuery("(min-width:1200px)");
   const { getToken } = useAuth();
 
   const { data, isLoading, isError } = useQuery({
@@ -107,21 +63,13 @@ function ReadBlog() {
   });
 
   if (isLoading) {
-    return <Demo />;
+    return <Skeleton height={300} />;
   }
 
-  if (isError) {
+  if (isError || !data) {
     return (
       <Center maw={800} w={"100%"} ref={ref} h="100%">
         <Text>Error occurred while fetching the blog.</Text>
-      </Center>
-    );
-  }
-
-  if (!data) {
-    return (
-      <Center maw={800} w={"100%"} ref={ref} h="100%">
-        <Text>No blog data found.</Text>
       </Center>
     );
   }
@@ -130,7 +78,6 @@ function ReadBlog() {
 
   return (
     <Stack ref={ref} w={"100%"} miw={300} align="start" maw={800} px="md" mx="auto" gap="lg" mb={isSmallScreen ? 100 : 0}>
-      {/* Blog Image */}
       <Image 
         w="100%" 
         miw={300} 
@@ -143,7 +90,6 @@ function ReadBlog() {
       />
 
       <Stack gap={0}>
-        {/* Book Badge */}
         <Badge 
           color={colorScheme === "dark" ? dark_theme.main_text_color : theme.colors.gray[6]} 
           mt="md" 
@@ -155,21 +101,22 @@ function ReadBlog() {
           {blogData.books.book_name}
         </Badge>
 
-        {/* Author Name */}
         <Text 
           c={colorScheme === "dark" ? "#febeb5" : theme.colors.gray[6]} 
           ta="left" 
-          size="md" 
+          size="md"
           className={afacad_flux.className}
         >
           —{blogData.books?.author || "Unknown"}
         </Text>
+
+        {typeof window !== "undefined" && blogData.blog_markdown && (
+          <TextToSpeechButton blogContent={blogData.blog_markdown} />
+        )}
       </Stack>
 
-      {/* Blog Content */}
       <MarkdownToCustom markdown={blogData.blog_markdown} />
 
-      {/* Related Blogs */}
       <Stack gap={0}>
         <Text className={afacad_flux.className} mt="lg" c="gray" style={{ textTransform: "uppercase" }}>
           more from

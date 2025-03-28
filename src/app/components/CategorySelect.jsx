@@ -49,7 +49,7 @@ const CategorySelect = () => {
         style={{
           ...styles.dropdownList(colorScheme, theme),
           maxHeight: open ? "1000px" : "0", // Animate height
-          opacity: open ? 1 : 0, // Animate opacity
+          opacity: open ? 1 : 0,  // Animate opacity
           overflow: "hidden",
           transition: "max-height 0.10s ease, opacity 0.10s ease", 
         }}
